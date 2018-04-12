@@ -1,0 +1,70 @@
+<script src="synaptic.min.js"></script>
+<script>
+    // create the network
+    const { Layer, Network } = window.synaptic;
+
+    // input 4 key stats about each fighter: wins by KO, wins by Sub, losses by KO, losses by Sub
+    var inputLayer = new Layer(8);
+    var hiddenLayer = new Layer(6); // average of input layer and output layer, general rule of thumb from Stack Overflow
+    var outputLayer = new Layer(3); // winner, isKO, isSub
+
+    inputLayer.project(hiddenLayer, Layer.connectionType.ALL_TO_ALL);
+    hiddenLayer.project(outputLayer, Layer.connectionType.ALL_TO_ALL);
+
+    var myNetwork = new Network({
+        input: inputLayer,hidden: [hiddenLayer],
+        output: outputLayer
+    });
+
+    // train the network
+    var learningRate = .03;
+    for (var i = 0; i < 800000; i++)
+    {
+        myNetwork.activate([1, 8, 0, 0, 3, 6, 3, 1]);
+        myNetwork.propagate(learningRate, [0,1,0]);
+
+        myNetwork.activate([6, 2, 1, 0, 2, 4, 0, 0]);
+        myNetwork.propagate(learningRate, [1,0,1]);
+
+        myNetwork.activate([1, 4, 2, 0, 3, 0, 0, 2]);
+        myNetwork.propagate(learningRate, [1,0,0]);
+        
+        myNetwork.activate([3, 1, 1, 1, 7, 2, 0, 1]);
+        myNetwork.propagate(learningRate, [0,0,0]);
+
+        myNetwork.activate([7, 18, 6, 3, 7, 3, 0, 3]);
+        myNetwork.propagate(learningRate, [1,1,0]);
+
+        myNetwork.activate([7, 0, 1, 0, 10, 0, 5, 6]);
+        myNetwork.propagate(learningRate, [0,0,0]);
+
+        myNetwork.activate([9, 4, 0, 0, 16, 0, 1, 4]);
+        myNetwork.propagate(learningRate, [0,0,1]);
+
+        myNetwork.activate([11, 0, 1, 0, 6, 8, 4, 0]);
+        myNetwork.propagate(learningRate, [0,1,0]);
+
+        /* create training cases using real data for the following situations:
+            0,0,0 : fighter1, decision
+            0,1,0 : fighter1, ko
+            0,0,1 : fighter1, sub
+            1,0,0 : fighter2, decision
+            1,1,0 : fighter2, ko
+            1,0,1 : fighter2, sub
+        */
+    }
+
+    // test the network
+    resultArray = new Array();
+    resultArray.push(myNetwork.activate([3, 1, 1, 1, 7, 2, 0, 1]) + ' 0,0,0');
+    resultArray.push(myNetwork.activate([1, 8, 0, 0, 3, 6, 3, 1]) + ' 0,1,0');
+    resultArray.push(myNetwork.activate([9, 4, 0, 0, 16, 0, 1, 4]) + ' 0,0,1');
+    resultArray.push(myNetwork.activate([1, 4, 2, 0, 3, 0, 0, 2]) + ' 1,0,0');
+    resultArray.push(myNetwork.activate([7, 18, 6, 3, 7, 3, 0, 3]) + ' 1,1,0');
+    resultArray.push(myNetwork.activate([6, 2, 1, 0, 2, 4, 0, 0]) + ' 1,0,1');
+    resultArray.push(myNetwork.activate([7, 0, 1, 0, 10, 0, 5, 6]) + ' 0,0,0');
+    resultArray.push(myNetwork.activate([11, 0, 1, 0, 6, 8, 4, 0]) + ' 0,1,0');
+
+    console.log(resultArray);
+    
+</script>
