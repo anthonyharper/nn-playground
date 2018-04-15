@@ -1,0 +1,133 @@
+<script src="synaptic.min.js"></script>
+<script>
+    // create the network
+    const { Layer, Network } = window.synaptic;
+
+    // training data, this probably needs a *lot* more data, hundreds of fights at least...maybe scrape sherdog
+    var fights = new Array();
+    var fight_proto = new Object();
+    fight_proto.stats = new Array();
+    fight_proto.results = new Array();
+    fight_proto.w_network_r = '';
+    fight_proto.m_network_r = '';
+    fight_proto.r_network_r = '';
+
+    var fight = Object.assign({},fight_proto);
+    stats = [1, 8, 0, 0, 3, 6, 3, 1];
+    results = [0,1,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [6, 2, 1, 0, 2, 4, 0, 0];
+    results = [1,0,1];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [1, 4, 2, 0, 3, 0, 0, 2];
+    results = [1,0,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+    
+    var fight = Object.assign({},fight_proto);
+    stats = [3, 1, 1, 1, 7, 2, 0, 1];
+    results = [0,0,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [7, 18, 6, 3, 7, 3, 0, 3];
+    results = [1,1,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [7, 0, 1, 0, 10, 0, 5, 6];
+    results = [0,0,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [9, 4, 0, 0, 16, 0, 1, 4];
+    results = [0,0,1];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    var fight = Object.assign({},fight_proto);
+    stats = [11, 0, 1, 0, 6, 8, 4, 0];
+    results = [0,1,0];
+    fight.stats = stats;
+    fight.results = results;
+    fights.push(fight);
+
+    // winner calculation w_
+    // input 4 key stats about each fighter: wins by KO, wins by Sub, losses by KO, losses by Sub
+    var w_inputLayer = new Layer(8);
+    var w_hiddenLayer = new Layer(5); // average of input layer and output layer, general rule of thumb from Stack Overflow
+    var w_outputLayer = new Layer(1); // winner
+
+    w_inputLayer.project(w_hiddenLayer, Layer.connectionType.ALL_TO_ALL);
+    w_hiddenLayer.project(w_outputLayer, Layer.connectionType.ALL_TO_ALL);
+
+    var w_network = new Network({
+        input: w_inputLayer,
+        hidden: [w_hiddenLayer],
+        output: w_outputLayer
+    });
+
+    var w_learningRate = 0.03;
+
+    // method calculation m_
+    var m_inputLayer = new Layer(8);
+    var m_hiddenLayer = new Layer(5); // average of input layer and output layer, general rule of thumb from Stack Overflow
+    var m_outputLayer = new Layer(1); // method
+
+    m_inputLayer.project(m_hiddenLayer, Layer.connectionType.ALL_TO_ALL);
+    m_hiddenLayer.project(m_outputLayer, Layer.connectionType.ALL_TO_ALL);
+
+    var m_network = new Network({
+        input: m_inputLayer,
+        hidden: [m_hiddenLayer],
+        output: m_outputLayer
+    });
+
+    var m_learningRate = 0.03;
+
+    // train the networks
+    for (var i = 0; i < 4000; i++){
+        for(var f in fights){
+            // train win prediction
+            w_network.activate(fights[f].stats);
+            w_network.propagate(w_learningRate, fights[f].results[0]); // results[0] is winner, 0 for first fighter, 1 for second
+            
+            // train method prediction
+            m_network.activate(fights[f].stats);
+            var method = 0;
+            if(fights[f].results[1] == 1){
+                method = 1;
+            }
+            if(fights[f].results[2] == 1){
+                method = 2;
+            }
+            m_network.propagate(m_learningRate, method);
+        }
+    }
+
+    // test it out
+    for(var f in fights){
+        console.log(fights[f].stats);
+        console.log(fights[f].results[0]);
+        console.log(w_network.activate(fights[f].stats));
+        // fights[f].m_network_r = m_network.activate(fights[f].stats);
+    }
+    console.log(fights);
+    // getting a whole bunch of NaN responses from the network...
+</script>

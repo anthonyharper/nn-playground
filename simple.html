@@ -12,7 +12,8 @@
     hiddenLayer.project(outputLayer, Layer.connectionType.ALL_TO_ALL);
 
     var myNetwork = new Network({
-        input: inputLayer,hidden: [hiddenLayer],
+        input: inputLayer,
+        hidden: [hiddenLayer],
         output: outputLayer
     });
 
