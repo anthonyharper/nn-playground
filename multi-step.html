@@ -4,7 +4,7 @@
     const { Layer, Network } = window.synaptic;
 
     // training data, this probably needs a *lot* more data, hundreds of fights at least...maybe scrape sherdog
-    var fights = new Array();
+    var train_fights = new Array();
     var fight_proto = new Object();
     fight_proto.stats = new Array();
     fight_proto.results = new Array();
@@ -15,42 +15,42 @@
     var fight = Object.assign({},fight_proto);
     fight.stats = [1, 8, 0, 0, 3, 6, 3, 1];
     fight.results = [0,1,0];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [6, 2, 1, 0, 2, 4, 0, 0];
     fight.results = [1,0,1];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [1, 4, 2, 0, 3, 0, 0, 2];
     fight.results = [1,0,0];
-    fights.push(fight);
+    train_fights.push(fight);
     
     var fight = Object.assign({},fight_proto);
     fight.stats = [3, 1, 1, 1, 7, 2, 0, 1];
     fight.results = [0,0,0];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [7, 18, 6, 3, 7, 3, 0, 3];
     fight.results = [1,1,0];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [7, 0, 1, 0, 10, 0, 5, 6];
     fight.results = [0,0,0];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [9, 4, 0, 0, 16, 0, 1, 4];
     fight.results = [0,0,1];
-    fights.push(fight);
+    train_fights.push(fight);
 
     var fight = Object.assign({},fight_proto);
     fight.stats = [11, 0, 1, 0, 6, 8, 4, 0];
     fight.results = [0,1,0];
-    fights.push(fight);
+    train_fights.push(fight);
 
     // winner calculation w_
     // input 4 key stats about each fighter: wins by KO, wins by Sub, losses by KO, losses by Sub
@@ -87,28 +87,28 @@
 
     // train the networks
     for (var i = 0; i < 4000; i++){
-        for(var f in fights){
+        for(var f in train_fights){
             // train win prediction
-            w_network.activate(fights[f].stats);
-            w_network.propagate(w_learningRate, [fights[f].results[0]]); // results[0] is winner, 0 for first fighter, 1 for second
+            w_network.activate(train_fights[f].stats);
+            w_network.propagate(w_learningRate, [train_fights[f].results[0]]); // results[0] is winner, 0 for first fighter, 1 for second
             
             // train method prediction
-            m_network.activate(fights[f].stats);
-            var method = 0;
-            if(fights[f].results[1] == 1){
-                method = 1;
+            m_network.activate(train_fights[f].stats);
+            var method = 0; // decision
+            if(train_fights[f].results[1] == 1){
+                method = 0.5; // KO
             }
-            if(fights[f].results[2] == 1){
-                method = 2;
+            if(train_fights[f].results[2] == 1){
+                method = 1; // submission
             }
             m_network.propagate(m_learningRate, [method]);
         }
     }
 
     // test it out
-    for(var f in fights){
-        fights[f].w_network_r = w_network.activate(fights[f].stats);
-        fights[f].m_network_r = m_network.activate(fights[f].stats);
+    for(var f in train_fights){
+        train_fights[f].w_network_r = Math.round(w_network.activate(train_fights[f].stats)*10)/10;
+        train_fights[f].m_network_r = Math.round(m_network.activate(train_fights[f].stats)*10)/10;
     }
-    console.log(fights);
+    console.log(train_fights);
 </script>
