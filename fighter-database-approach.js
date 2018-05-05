@@ -1,4 +1,6 @@
-var sql = require ('sqlite3').verbose();
+const sql = require ('sqlite3').verbose();
+const synaptic = require('synaptic');
+
 let db = new sql.Database('./db/fighters.db', (err) => {
     if (err) {
         return console.error(err.message);
@@ -6,12 +8,13 @@ let db = new sql.Database('./db/fighters.db', (err) => {
     console.log('Connected to the fighters SQlite database.');
 });
 
-var synaptic = require('synaptic');
 
 // create the network
 const { Layer, Network } = synaptic;
 
 // need to populate the fighter database with relevant stats about the most recently resolved event, which will need full fight history of each fighter, including each of their past opponents, which rapidly spirals into a full database of every MMA event / fighter... Sherdog already has this so it's probably time to write that scraper
+
+// trying to use cheerio and request-promise for scraping, require statements producing errors...
 
 // NOTE TO SELF: Input values should be between 0 and 1, normalize your inputs
 // then train the network to accurately predict the outcomes of the last event, making sure that the outcomes of that event are scrubbed from the training data set.
